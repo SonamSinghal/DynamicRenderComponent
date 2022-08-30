@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace DataModel.Migrations
 {
-    public partial class FirstMiration : Migration
+    public partial class FirstMigration : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -15,10 +15,10 @@ namespace DataModel.Migrations
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    ComponentName = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    ComponentName = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Sequence = table.Column<int>(type: "int", nullable: false),
-                    Zone = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    PageUrl = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Zone = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    PageUrl = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     CreatedOn = table.Column<DateTime>(type: "datetime2", nullable: false),
                     UpdatedOn = table.Column<DateTime>(type: "datetime2", nullable: false)
                 },

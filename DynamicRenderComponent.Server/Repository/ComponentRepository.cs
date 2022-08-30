@@ -26,7 +26,7 @@ namespace DynamicRenderComponent.Server.Repository
 
                 };
                 var id = await _context.Components.AddAsync(component);
-                component.Id = component.Id;
+               // component.Id = component.Id;
                 SaveChanges();
                 var id1 = component.Id;
             }
@@ -34,6 +34,12 @@ namespace DynamicRenderComponent.Server.Repository
             {
                 var exc = e;
             }
+        }
+
+        public async Task<List<ComponentModel>> GetAllComponentsAsync(string url)
+        {
+            var data = _context.Components.Where(x => x.PageUrl == url).ToList();
+            return data;
         }
 
         public void SaveChanges()

@@ -21,5 +21,12 @@ namespace DynamicRenderComponent.Server.Controllers
             await _componentRepository.SaveComponent(model);
         }
 
+        [HttpGet("getComponents")]
+        public async Task<List<ComponentModel>> GetAllComponents(string url)
+        {
+            var data = await _componentRepository.GetAllComponentsAsync(url);
+            return data;
+        }
+
     }
 }

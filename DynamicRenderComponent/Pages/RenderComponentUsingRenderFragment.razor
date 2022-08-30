@@ -28,42 +28,54 @@ Welcome to your new app.
 
 <div>
     <h2>DIV 1</h2>
-    @foreach (var render in ComponentsList.Where(x => x.Zone == "1"))
+    @if (DatabaseComponentsList.Count != 0)
+    {
+        @foreach (var render in DatabaseComponentsList.Where(x => x.Zone == "1").OrderBy(x => x.Sequence))
+        {
+            RenderZones(render.ComponentName);
+            <div>@renderZoneFragments</div>
+        }
+    }
+    @foreach (var render in CurrentComponentsList.Where(x => x.Zone == "1"))
     {
         RenderZones(render.ComponentName);
         <div>@renderZoneFragments</div>
-    }
-    @if (type != null && zone == "1")
-    {
-        <div>@renderFragment</div>
     }
     <hr />
 </div>
 <div>
     <h2>DIV 2</h2>
-    @foreach (var render in ComponentsList.Where(x => x.Zone == "2"))
+    @if (DatabaseComponentsList.Count != 0)
+    {
+        @foreach (var render in DatabaseComponentsList.Where(x => x.Zone == "2").OrderBy(x => x.Sequence))
+        {
+            RenderZones(render.ComponentName);
+            <div>@renderZoneFragments</div>
+            
+        }
+    }
+    @foreach (var render in CurrentComponentsList.Where(x => x.Zone == "2"))
     {
         RenderZones(render.ComponentName);
-        @renderZoneFragments
-        ;
-    }
-    @if (type != null && zone == "2")
-    {
-        @renderFragment
+        <div>@renderZoneFragments</div>
     }
     <hr />
 </div>
 
 <div>
     <h2>DIV 3</h2>
-    @foreach (var render in ComponentsList.Where(x => x.Zone == "3"))
+    @if (DatabaseComponentsList.Count != 0)
+    {
+        @foreach (var render in DatabaseComponentsList.Where(x => x.Zone == "3").OrderBy(x => x.Sequence))
+        {
+            RenderZones(render.ComponentName);
+            <div>@renderZoneFragments</div>
+        }
+    }
+    @foreach (var render in CurrentComponentsList.Where(x => x.Zone == "3"))
     {
         RenderZones(render.ComponentName);
-        @renderZoneFragments
-    }
-    @if (type != null && zone == "3")
-    {
-        @renderFragment
+        <div>@renderZoneFragments</div>
     }
     <hr />
 </div>
@@ -73,25 +85,23 @@ Welcome to your new app.
     //List<string> types = new List<string> { "CheckboxComponent", "TextboxComponent" };
     List<Type> types = Assembly.GetExecutingAssembly().GetTypes().Where(type => type.GetInterfaces().Contains(typeof(IWebComponents))).ToList();
     List<string> zones = new List<string> { "1", "2", "3" };
-    List<ComponentModel> ComponentsList = new List<ComponentModel>();
+    List<ComponentModel> CurrentComponentsList = new List<ComponentModel>();
+    List<ComponentModel> DatabaseComponentsList = new List<ComponentModel>();
 
 
     int sequence1 = 0;
     int sequence2 = 0;
     int sequence3 = 0;
 
-    int Sequence = 0;
-
-    string ComponentNamespace = "DynamicRenderingOfComponent.Components.";
+    string ComponentNamespace = "DynamicRenderComponent.Components.";
 
     public Type? type;
     private string selectedType = String.Empty;
     private string select = String.Empty;
     private string selectedZone = String.Empty;
     private string zone = String.Empty;
-    private bool shouldRender = false;
+    private bool shouldRender = true;
 
-    RenderFragment? renderFragment;
     RenderFragment? renderZoneFragments;
 
     private RenderFragment CreateFragment(Type type) => builder =>
@@ -104,6 +114,37 @@ Welcome to your new app.
         }
     };
 
+    protected async override Task OnInitializedAsync()
+    {
+        string url = navigationManager.Uri;
+        DatabaseComponentsList = await _componentService.GetAllComponentsAsync(url);
+        if (DatabaseComponentsList.Where(x => x.Zone == "1").ToList().Count == 0)
+        {
+            sequence1 = 0;
+        }
+        else {
+            sequence1 = DatabaseComponentsList.Where(x => x.Zone == "1").Select(x => x.Sequence).Max();
+        }
+
+        if (DatabaseComponentsList.Where(x => x.Zone == "2").ToList().Count == 0)
+        {
+            sequence2 = 0;
+        }
+        else
+        {
+            sequence2 = DatabaseComponentsList.Where(x => x.Zone == "2").Select(x => x.Sequence).Max();
+        }
+
+        if (DatabaseComponentsList.Where(x => x.Zone == "3").ToList().Count == 0)
+        {
+            sequence3 = 0;
+        }
+        else
+        {
+            sequence3 = DatabaseComponentsList.Where(x => x.Zone == "3").Select(x => x.Sequence).Max();
+        }
+    }
+
     public async Task RenderComponent()
     {
         shouldRender = true;
@@ -111,30 +152,28 @@ Welcome to your new app.
         select = selectedType;
         string url = navigationManager.Uri;
 
-        switch (zone)
-        {
-            case "1":
-                Sequence = sequence1 + 1;
-                break;
-            case "2":
-                Sequence = sequence2 + 1;
-                break;
-            case "3":
-                Sequence = sequence3 + 1;
-                break;
-        }
         ComponentModel component = new ComponentModel()
             {
                 ComponentName = select,
                 CreatedOn = DateTime.Now,
                 Zone = zone,
-                Sequence = Sequence,
                 PageUrl = url
             };
-        ComponentsList.Add(component);
 
-        type = Type.GetType($"{ComponentNamespace}{selectedType}");
-        renderFragment = CreateFragment(type);
+        switch (zone)
+        {
+            case "1":
+                component.Sequence = ++sequence1;
+                break;
+            case "2":
+                component.Sequence = ++sequence2;
+                break;
+            case "3":
+                component.Sequence = ++sequence3;
+                break;
+        }
+
+        CurrentComponentsList.Add(component);
         var response = await _componentService.PostComponent(component);
     }
 
@@ -151,8 +190,11 @@ Welcome to your new app.
 
     protected override Task OnAfterRenderAsync(bool firstRender)
     {
-        shouldRender = false;
-        firstRender = shouldRender;
+        if (!firstRender)
+        {
+            shouldRender = false;
+            firstRender = shouldRender;
+        }
 
         return base.OnAfterRenderAsync(firstRender);
     }

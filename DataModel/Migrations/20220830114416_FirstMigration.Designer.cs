@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DataModel.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20220829154858_GuidId")]
-    partial class GuidId
+    [Migration("20220830114416_FirstMigration")]
+    partial class FirstMigration
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -26,19 +26,19 @@ namespace DataModel.Migrations
 
             modelBuilder.Entity("DataModel.ComponentModel", b =>
                 {
-                    b.Property<Guid>("ComponentId")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
 
                     b.Property<string>("ComponentName")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("CreatedOn")
                         .HasColumnType("datetime2");
 
                     b.Property<string>("PageUrl")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("Sequence")
@@ -48,10 +48,9 @@ namespace DataModel.Migrations
                         .HasColumnType("datetime2");
 
                     b.Property<string>("Zone")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.HasKey("ComponentId");
+                    b.HasKey("Id");
 
                     b.ToTable("Components");
                 });

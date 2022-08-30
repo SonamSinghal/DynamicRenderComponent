@@ -6,5 +6,6 @@ namespace DynamicRenderComponent.Server.Repository
     {
         void SaveChanges();
         Task SaveComponent(ComponentModel model);
+        Task<List<ComponentModel>> GetAllComponentsAsync(string url);
     }
 }
